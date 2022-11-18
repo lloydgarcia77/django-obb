@@ -1,0 +1,35 @@
+{% load static %}
+{% load humanize %}
+{% load custom_tags %}
+
+
+{% for s in schedule %}
+<div class="card card-warning shadow">
+
+    <div class="card-body">
+
+        <dl class="row">
+            <dt class="col-sm-4">Name:</dt>
+            <dd class="col-sm-8"> {{ s.name }}</dd>
+            <dt class="col-sm-4">Driver Name:</dt>
+            <dd class="col-sm-8"> {{ s.driver_name }}</dd>
+            <dt class="col-sm-4">Conductor Name:</dt>
+            <dd class="col-sm-8"> {{ s.conductor_name }}</dd>
+            <dt class="col-sm-4">Type:</dt>
+            <dd class="col-sm-8"> {{ s.type }}</dd>
+            <dt class="col-sm-4">Plate #:</dt>
+            <dd class="col-sm-8"> {{ s.plate_no }}</dd>
+            <dt class="col-sm-4">Total Seats:</dt>
+            <dd class="col-sm-8"> {{ s.total_seat_no }}</dd>
+            <dt class="col-sm-4">Total Seats Available:</dt>
+            <dd class="col-sm-8"> {{ s.total_avail_seat_no }}</dd>
+        </dl>
+        <hr>
+        <input id="{{s.id}}" type="radio" name="bus" value="{{s.id}}">
+        <label for="{{s.id}}" class="custom-radio">
+        </label>
+    </div>
+
+</div>
+{% empty %}
+{% endfor %}

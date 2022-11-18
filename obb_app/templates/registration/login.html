@@ -1,0 +1,59 @@
+{% extends 'registration/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}
+CISCO | Login
+{% endblock title%}
+
+{% block additional_css %}
+{% endblock additional_css %}
+
+
+{% block content_body %}
+<div class="login-box"> 
+    <div class="card">
+        <div class="card-body login-card-body text-center">
+            <h2 class="text-center text-capitalize">Online Bus Booking</h2>
+            <p class="login-box-msg">Please enter your administrator account!</p>
+
+            <form method="post">
+                {% csrf_token %}
+                {% include 'partials/_messages.html' %} 
+                <div class="input-group mb-3">
+                    <input type="email" class="form-control" placeholder="Email" name="email" required>
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-envelope"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group mb-3">
+                    <input type="password" class="form-control" placeholder="Password"  name="password" required>
+                    <div class="input-group-append">
+                        <div class="input-group-text">
+                            <span class="fas fa-lock"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                  
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-danger btn-block">
+                            <i class="fas fa-sign-in-alt mr-1"></i>
+                            Login In
+                        </button>
+                    </div> 
+                </div>
+            </form>
+            
+
+          
+        </div>
+        <!-- /.login-card-body -->
+    </div>
+</div>
+{% endblock content_body %}
+
+{% block rearscript %}
+{% endblock rearscript %}

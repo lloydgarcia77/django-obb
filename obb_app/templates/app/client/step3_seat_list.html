@@ -1,0 +1,104 @@
+{% load static %}
+{% load humanize %}
+{% load custom_tags %}
+
+
+<div class="card card-warning shadow">
+    <div class="card-header">
+        <div class="card-title">
+            <b> Bus Seats</b>
+        </div>
+    </div>
+    <div class="card-body seats">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="simple-box">
+                    Driver Seat
+                </div>
+
+            </div>
+            <div class="col-md-4 ">
+                <div class="simple-box">
+                    LCD Monitory
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="simple-box">
+                    Conductor
+                </div>
+            </div>
+        </div>
+        <div class="row mb-0">
+
+            {% for b in sorted_bus_seat %}
+            {% if forloop.counter > sorted_bus_seat|length|add:"-5" %}
+            <div class="col mb-2">
+                <div class="seat-item">
+                    <input id="{{b.id}}" type="checkbox" value="{{b.name}}" class="seat">
+                    <label for="{{b.id}}" class="text-uppercase">{{b.name}}</label>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-md-3 mb-2">
+                <div class="seat-item">
+                    <input id="{{b.id}}" type="checkbox" value="{{b.name}}" class="seat">
+                    <label for="{{b.id}}" class="text-uppercase">{{b.name}}</label>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="simple-box">
+                    Rear
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    <div class="row">
+        <div class="col-md-3 pt-2 pb-2">
+            <div class="align-middle d-flex"> 
+                <label class="legend-label">
+                    Other Utilities:
+                </label>
+                <span class="legend-box blue">
+    
+                </span>
+            </div>
+        </div>
+        <div class="col-md-3 pt-2 pb-2">
+            <div class="align-middle d-flex"> 
+                <label class="legend-label">
+                    Vacant:
+                </label>
+                <span class="legend-box">
+    
+                </span>
+            </div>
+        </div>
+        <div class="col-md-3 pt-2 pb-2">
+            <div class="align-middle d-flex"> 
+                <label class="legend-label">
+                    Selected:
+                </label>
+                <span class="legend-box green">
+    
+                </span>
+            </div>
+        </div>
+        <div class="col-md-3 pt-2 pb-2">
+            <div class="align-middle d-flex"> 
+                <label class="legend-label">
+                    Occupied:
+                </label>
+                <span class="legend-box red">
+    
+                </span>
+            </div>
+        </div>
+      
+    </div>
+
+</div>

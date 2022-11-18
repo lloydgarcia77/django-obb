@@ -1,0 +1,123 @@
+{% load static %}
+{% load humanize %}
+{% load custom_tags %}
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>
+        {% block title %}
+        {% endblock title%}
+    </title>
+    <link href="{% static 'images/obb_logo.ico'%}" rel="icon">
+    {% block css %}
+    <!-- NOTE:  Google Font: Source Sans Pro -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- NOTE:  Font Awesome Icons -->
+    <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+
+    <!-- NOTE:  daterange picker -->
+    <link rel="stylesheet" href="{% static 'plugins/daterangepicker/daterangepicker.css' %}">
+    <!-- NOTE:  Select2 -->
+    <link rel="stylesheet" href="{% static 'plugins/select2/css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css' %}">
+    <!-- NOTE:  Toastr -->
+    <link rel="stylesheet" href="{% static 'plugins/toastr/toastr.min.css' %}">
+    <!-- NOTE:  Theme style -->
+    <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+    <!-- NOTE:  Sweet Alert -->
+    <link rel="stylesheet" href="{% static 'sweetalert2-11.3.5/package/dist/sweetalert2.min.css' %}">
+
+    {% endblock css %}
+
+    {% block additional_css %}
+    {% endblock additional_css %}
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+            <a class="navbar-brand" href="#">
+                <img src="{% static 'images/obb_logo.png' %}" width="30" height="30" alt="" class="rounded-circle">
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+                aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/admin/">Super Admin</a>
+                    </li>
+                    <li class="nav-item ">
+                        <a class="nav-link" href="{% url 'obb_app:administrator_index' %}">Home <span
+                                class="sr-only">(current)</span></a>
+                    </li>
+               
+                    <li class="nav-item">
+                        <a class="nav-link" href="">Reports</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="">Transactions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="">Schedules</a>
+                    </li> 
+
+                </ul>
+                <form class="form-inline my-2 my-lg-0">
+                    <a href="{% url 'logout' %}" class="btn btn-outline-danger my-2 my-sm-0">Logout</a>
+                </form>
+            </div>
+        </nav>
+    </header>
+
+    {% block content_body %}
+
+
+    {% endblock content_body %}
+
+    <!-- NOTE:   Bootstrap core JavaScript
+    ================================================== -->
+    <!-- NOTE:  Placed at the end of the document so the pages load faster -->
+    {% block js %}
+    <!-- NOTE:  jQuery -->
+    <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+
+    <!-- NOTE:  jQuery UI 1.11.4 -->
+    <script src="{% static 'plugins/jquery-ui/jquery-ui.min.js' %}"></script>
+    <!-- NOTE:  Bootstrap -->
+    <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <!-- NOTE:  AdminLTE App -->
+    <script src="{% static 'dist/js/adminlte.js' %}"></script>
+    <!-- NOTE:  Select2 -->
+    <script src="{% static 'plugins/select2/js/select2.full.min.js' %}"></script>
+    <!-- NOTE:  ChartJS -->
+    <script src="{% static 'plugins/chart.js/Chart.min.js' %}"></script>
+    <!-- NOTE:  date-range-picker -->
+    <script src="{% static 'plugins/daterangepicker/daterangepicker.js' %}"></script>
+    <!-- NOTE:  Toastr -->
+    <script src="{% static 'plugins/toastr/toastr.min.js' %}"></script>
+    <script src="{% static 'sweetalert2-11.3.5/package/dist/sweetalert2.min.js' %}"></script>
+
+    <!-- NOTE:  Icons -->
+    <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+    <script>
+        feather.replace()
+    </script>
+
+    <script src="{% static 'js/base.js' %}"></script>
+    {% endblock js %}
+    {% block rearscript %}
+    {% endblock rearscript %}
+
+
+</body>
+
+</html>

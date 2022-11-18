@@ -105,3 +105,132 @@ class User(AbstractBaseUser, PermissionsMixin):
         # Simplest possible answer: Yes, always
         return True
      
+ 
+class Bus(models.Model):
+    BUS_TYPE = (
+        ('ordinary', 'ordinary'),
+        ('aircon', 'aircon'),
+    )
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4) 
+    name = models.CharField(max_length=255) 
+    driver_name = models.CharField(max_length=255) 
+    conductor_name = models.CharField(max_length=255)  
+    type = models.CharField(max_length=255, choices=BUS_TYPE, default='aircon')  
+    plate_no = models.CharField(max_length=255, unique=True)  
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self): 
+        return self.name
+    
+
+    def save(self, *args, **kwargs):
+        seats = [f's-{i}' for i in range(1,50)]
+        bus_seats = BusSeat.objects.all().filter(bus=self)
+        bus_seats = [s.name for s in bus_seats]
+        additional_seats = set(seats) - set(bus_seats)
+        removalble_seats = set(bus_seats) - set(seats) 
+
+        if removalble_seats:
+            for s in removalble_seats:
+                BusSeat.objects.get(Q(bus=self) & Q(name=s))
+        
+        if additional_seats:
+            bulk_create = [
+                BusSeat(
+                    bus=self,
+                    name=s
+                ) for s in additional_seats
+            ]
+
+            BusSeat.objects.bulk_create(bulk_create) 
+        super(Bus, self).save(*args, **kwargs)
+
+    class Meta:
+        ordering = ['-date_created']
+
+
+# NOTE 49 seats
+class BusSeat(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4) 
+    bus = models.ForeignKey(Bus, related_name='fk_bs_bus', on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    occupied = models.BooleanField(default=False)
+    date_created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self): 
+        return self.name
+    
+    class Meta:
+        ordering = ['name']
+        unique_together = ('bus','name')
+
+class Route(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)   
+    name = models.CharField(max_length=200, unique=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self): 
+        return self.name
+
+    class Meta:
+        ordering = ['-date_created']
+
+
+class DailySchedule(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)    
+    source = models.ForeignKey(Route, related_name='fk_ds_source', on_delete=models.CASCADE)
+    destination = models.ForeignKey(Route, related_name='fk_ds_destination', on_delete=models.CASCADE)
+    via = models.ForeignKey(Route, related_name='fk_ds_via', on_delete=models.CASCADE)
+    bus = models.ManyToManyField(Bus, related_name='fk_sd_m2m_bus')
+    time = models.TimeField() 
+    date_created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self): 
+        return self.source.name
+
+    class Meta:
+        ordering = ['-date_created']
+    
+
+class Booking(models.Model):
+    PENDING = 'pending' 
+    APPROVED = 'approved'
+
+    STATUS_LIST = (
+        (PENDING,'pending'), 
+        (APPROVED,'approved'),
+    )
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4) 
+    scheduled_route = models.ForeignKey(DailySchedule, related_name='fk_booking_route', on_delete=models.CASCADE)
+    bus = models.ForeignKey(Bus, related_name='fk_booking_bus', on_delete=models.CASCADE)
+    # ! https://bobbyhadz.com/blog/python-add-time-to-datetime-object
+    datetime = models.DateTimeField() 
+    is_paid = models.BooleanField(default=False)
+    total_cost = models.FloatField()
+    seat_person = models.JSONField()
+    status = models.CharField(max_length=50, choices=STATUS_LIST, default=PENDING)
+    date_created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.scheduled_route.source.name + " -> " + self.scheduled_route.destination.name 
+
+    class Meta:    
+        
+        ordering = ['-date_created']
+
+class Receipt(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4) 
+    booking = models.ForeignKey(Booking, related_name="fk_receipt_booking", on_delete=models.SET_NULL, blank=True, null=True)
+    # NOTE: Source -> Destination VIA 
+    route = models.CharField(max_length=200)
+    total_cost = models.FloatField()
+    date = models.DateField()
+    seat_person = models.JSONField()
+    date_created = models.DateTimeField(auto_now_add=True)
+        
+    def __str__(self):
+        return self.route
+
+    class Meta:    
+        
+        ordering = ['-date_created']

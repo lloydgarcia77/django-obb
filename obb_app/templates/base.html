@@ -1,0 +1,264 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>CISCO</title>
+
+    <link href="{% static 'images/obb_logo.ico'%}" rel="icon">
+</head>
+
+<body>
+    <!-- Header -->
+    <section id="header">
+        <div class="header container">
+            <div class="nav-bar">
+                <div class="brand">
+                    <a href="#hero">
+                        <h1><span>C</span>IS<span>C</span>O</h1>
+                    </a>
+                </div>
+                <div class="nav-list">
+                    <div class="hamburger">
+                        <div style class="bar"></div>
+                    </div>
+                    <ul>
+                        <li><a href="#hero" data-after="Home">Home</a></li>
+                        <li><a href="#services" data-after="Service">How to book</a></li>
+                        <li><a href="#projects" data-after="Projects">What to expect?</a></li>
+                        <li><a href="#faqs" data-after="faqs">FAQs</a></li> 
+                        <li><a href="#contact" data-after="Contact">Contact</a></li>
+                        <li><a href="{% url 'obb_app:administrator_index' %}" >Admin</a></li>
+
+                    </ul>
+                </div>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="input-group">
+
+                        <input type="text" name="search-tracker" class="search-input" placeholder="Enter your tracker id here." required>
+                        <button type="submit" class="search-submit">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!-- End Header -->
+
+    <!-- Hero Section  -->
+    <section id="hero">
+        <div class="hero container">
+            <div>
+
+                <h1>Philippine FASTEST<span></span></h1>
+                <h1>and SAFEST<span></span></h1>
+                <h1>Bus company<span></span></h1>
+                <a href="{% url 'obb_app:step1' %}" type="button" class="cta">Reserve now!</a>
+
+
+            </div>
+        </div>
+    </section>
+    <!-- End Hero Section  -->
+
+    <!-- Service Section -->
+    <section id="services">
+        <div class="services container">
+            <div class="service-top">
+                <h1 class="section-title">How<span>to</span>book</h1>
+                <p style="text-align:center; font-size: 30px;">You can reserve your seat with three easy steps!</p>
+            </div>
+            <div class="service-bottom">
+
+                <div class="service-item">
+                    <a href="reserved.php" ;>
+                        <div class="icon" style="text-align: center;"><img
+                                src="https://img.icons8.com/wired/64/000000/1-circle.png" /></div>
+                        <p style="text-align:center; font-size: 30px;">Choose destination </p>
+                </div></a>
+                <div class="icon" style="text-align: center;"><img
+                        src="https://img.icons8.com/ios-glyphs/30/000000/right.png" /></div>
+
+                <div class="service-item">
+                    <a onclick="myalert()" ;>
+                        <div class="icon" style="text-align: center;"><img
+                                src="https://img.icons8.com/wired/64/000000/2-circle.png" /></div>
+                        <p style="text-align:center; font-size: 30px;">Fill up details</p>
+                </div></a>
+                <div class="icon" style="text-align: center;"><img
+                        src="https://img.icons8.com/ios-glyphs/30/000000/right.png" /></div>
+
+                <div class="service-item">
+                    <a onclick="myalert()" ;>
+                        <div class="icon" style="text-align: center;"><img
+                                src="https://img.icons8.com/wired/64/000000/3-circle.png" /></div>
+                        <p style="text-align:center; font-size: 30px;">Confirm payment</p>
+                </div></a>
+            </div>
+        </div>
+        </div>
+    </section>
+    <!-- End Service Section -->
+
+
+    <!--gallery -->
+    <section id="projects">
+        <h1 style="font-size: 1px" ; class="section-title">CISCO<span>B</span>US</h1>
+        <p style="text-align:center; font-size: 20px;">Please make sure to strictly follow the social distancing measure
+            set by the government <br>to protect
+            you and your fellow passenger. Do not forget to wear your face mask properly <br>throughout the whole
+            journey. Travel safe!</p>
+        <br></br>
+        <div class="slideshow-container">
+            <div class="slide-item">
+                <a href=""><img src="{% static 'images/slide1.jpg' %}" style="width:50%"></a>
+                <!-- <divext">London, Ebgland</div> -->
+            </div>
+            <div class="slide-item">
+                <a href=""><img src="{% static 'images/slide2.jpg' %}" style="width:50%"></a>
+                <!-- <divext">Sunset in Romania</div> -->
+            </div>
+            <div class="slide-item">
+                <a href=""><img src="{% static 'images/slide3.jpg' %}" style="width:50%"></a>
+                <!--   <div class="text">New York, USA</div> -->
+            </div>
+        </div>
+
+        <br>
+    </section>
+    <!--end of gallery-->
+
+
+    <section id="faqs">
+        <br></br> <br></br>
+
+        <h1 class="section-title">F<span>A</span>Qs</h1>
+        <section class="faq-container">
+            <div class="faq-one">
+                <!-- faq question -->
+                <h1 style="font-size: 20px" ; class="faq-page">How do I get to the Cisco Cubao bus terminal?</h1>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <br></br>
+                    <p>Take the LRT-2 or MRT-3 train until the Araneta Center Cubao Station. From either stations, it
+                        will take 6 minutes or less to walk to Cisco's Cubao Terminal. This terminal is shared with Five
+                        Star Transport and the rest of Cisco's sister bus companies.</p>
+                    <br></br>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div class="faq-two">
+                <!-- faq question -->
+                <h1 style="font-size: 20px" ; class="faq-page">Do I get a fare discount rate as a student or senior?
+                </h1>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <br></br>
+                    <p>Child, Student, Senior, and PWD discounts of 20% apply for tickets bought from the bus terminal
+                        only.</p>
+                    <br></br>
+                </div>
+            </div>
+            <hr class="hr-line">
+            <div class="faq-three">
+                <!-- faq question -->
+                <h1 style="font-size: 20px" ; class="faq-page">Can I rent a Cisco Bus for private purposes?</h1>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <br></br>
+                    <p>Cisco Bus rent is only available at the bus terminal only.</p>
+                    <br></br>
+                </div>
+                <hr class="hr-line">
+                <h1 style="font-size: 20px" ; class="faq-page">Is it possible to get a refund?</h1>
+                <!-- faq answer -->
+                <div class="faq-body">
+                    <br></br>
+                    <p>The refund is sought following the occurrence of bus journey cancellations and route suspensions
+                        for reasons other than safety and security reasons (as determined by our bus company)
+                        or when justified by circumstances beyond the Cisco bus' control
+                        or delays or diversions in the journey. Other reason that is not justified by circumstances
+                        beyond the Cisco bus is not applicable for refund. </p>
+                    <br></br>
+                </div>
+                <hr class="hr-line">
+            </div>
+        </section>
+    </section>
+    <!--faq end-->
+
+    <!-- Contact Section -->
+    <section id="contact">
+        <div class="contact container">
+            <div>
+                <h1 class="section-title">Contact <span>info</span></h1>
+            </div>
+            <div class="contact-items">
+                <div class="contact-item">
+                    <div class="icon"><img src="https://img.icons8.com/bubbles/100/000000/phone.png" /></div>
+                    <div class="contact-info">
+                        <h1>Phone</h1>
+                        <h2>+63 917 502 4726</h2>
+                        <h2> (02) 8725 3539</h2>
+                    </div>
+                </div>
+                <a href="mailto: ciscobus38@gmail.com">
+                    <div class="contact-item">
+                        <div class="icon"><img src="https://img.icons8.com/bubbles/100/000000/new-post.png" /></div>
+                </a>
+                <div class="contact-info">
+                    <h1>Email</h1>
+                    <h2>ciscobus38@gmail.com</h2>
+
+                </div>
+            </div>
+            <div class="contact-item">
+                <div class="icon"><img src="https://img.icons8.com/bubbles/100/000000/map-marker.png" /></div>
+                <div class="contact-info">
+                    <h1>Address</h1>
+                    <h2>#149 Mirasol St corner 20th Avenue 1109 Quezon City, Philippines</h2>
+                </div>
+            </div>
+        </div>
+        </div>
+    </section>
+    <!-- End Contact Section -->
+
+
+    <!-- Footer -->
+    <section id="footer">
+        <div class="footer container">
+            <div class="brand">
+                <h1><span>C</span>IS<span>C</span>O</h1>
+            </div>
+            <h2>Philippine fastest and safest bus company</h2>
+            <div class="social-icon">
+                <div class="social-item">
+                    <a href="https://www.facebook.com/CiscoBus"><img
+                            src="https://img.icons8.com/bubbles/100/000000/facebook-new.png" /></a>
+                </div>
+
+
+
+            </div>
+            <p> All rights reserved</p>
+        </div>
+    </section>
+
+
+
+    <!-- End Footer -->
+    <!-- NOTE:  jQuery -->
+    <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+
+    <!-- NOTE:  jQuery UI 1.11.4 -->
+    <script src="{% static 'plugins/jquery-ui/jquery-ui.min.js' %}"></script>
+    <!-- NOTE:  Bootstrap -->
+    <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/base.js' %}"></script>
+
+</body>

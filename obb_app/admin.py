@@ -94,3 +94,63 @@ class UserAdmin(BaseUserAdmin):
 
 admin.site.register(User, UserAdmin)
 
+
+class BusAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in models.Bus._meta.get_fields() if 'fk' not in field.name]
+    list_filter = ('date_created',)
+    search_fields = ('name', ) 
+    date_hierarchy = 'date_created'
+    ordering = ['id',]
+
+admin.site.register(models.Bus, BusAdmin)
+
+
+class BusSeatAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in models.BusSeat._meta.get_fields() if 'fk' not in field.name]
+    list_filter = ('date_created',)
+    search_fields = ('name', ) 
+    date_hierarchy = 'date_created'
+    ordering = ['id',]
+
+admin.site.register(models.BusSeat, BusSeatAdmin)
+
+
+class RouteAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in models.Route._meta.get_fields() if 'fk' not in field.name]
+    list_filter = ('date_created',)
+    search_fields = ('name', ) 
+    date_hierarchy = 'date_created'
+    ordering = ['id',]
+
+admin.site.register(models.Route, RouteAdmin)
+
+
+class DailyScheduleAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in models.DailySchedule._meta.get_fields() if 'fk' not in field.name and field.name not in ['bus',]]
+    list_filter = ('date_created',)
+    search_fields = ('name', ) 
+    date_hierarchy = 'date_created'
+    ordering = ['id',]
+
+admin.site.register(models.DailySchedule, DailyScheduleAdmin)
+
+
+class BookingAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in models.Booking._meta.get_fields() if 'fk' not in field.name]
+    list_filter = ('date_created',)
+    search_fields = ('bus__name', 'seat_person', 'scheduled_route__source__name',  'scheduled_route__destination__name') 
+    date_hierarchy = 'date_created'
+    ordering = ['id',]
+
+admin.site.register(models.Booking, BookingAdmin)
+
+
+class ReceiptAdmin(admin.ModelAdmin):
+    list_display = [field.name for field in models.Receipt._meta.get_fields() if 'fk' not in field.name]
+    list_filter = ('date_created',)
+    search_fields = ('route', 'seat_person', 'total_cost', ) 
+    date_hierarchy = 'date_created'
+    ordering = ['id',]
+
+admin.site.register(models.Receipt, ReceiptAdmin)
+

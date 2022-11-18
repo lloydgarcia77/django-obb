@@ -1,0 +1,51 @@
+{% extends 'app/client/base.html' %}
+
+{% load static %}
+{% load humanize %}
+{% load custom_tags %}
+
+{% block title %}
+CISCO | Step 2
+{% endblock title%}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'zabuto_calendar/zabuto_calendar.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/appointment.css' %}">
+<link rel="stylesheet" href="{% static 'css/reserve.css' %}">
+{% endblock additional_css %}
+
+{% block content_body %}
+<div class="container-fluid p-3">
+    <div class="container">
+        <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+            <h1 class="display-4">Step 2: Bus Selection</h1>
+        </div>
+        <div class="row"> 
+            <div class="col-12 bus-list-container">
+
+            </div>
+
+
+            <div class="col-12 text-center mt-5">
+                <a href="{% url 'obb_app:step1' %}" class="custom-button-danger">
+                    
+                    <i class="far fa-arrow-alt-circle-left mr-2"></i>
+                    Back to Step 1
+                </a>
+                <a href="{% url 'obb_app:step3' %}" class="custom-button-danger">
+                    Proceed to Step 3
+                    <i class="far fa-arrow-alt-circle-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock content_body %}
+
+{% block rearscript %}
+ 
+<script src="{% static 'js/getcookies.js' %}"></script>
+<script src="{% static 'js/client/step2.js' %}"></script>
+{% endblock rearscript %}

@@ -1,0 +1,156 @@
+{% extends 'app/client/base.html' %}
+
+{% load static %}
+{% load humanize %}
+{% load custom_tags %}
+
+{% block title %}
+CISCO | Step 3
+{% endblock title%}
+
+{% block additional_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'zabuto_calendar/zabuto_calendar.min.css' %}">
+<link rel="stylesheet" href="{% static 'css/appointment.css' %}">
+<link rel="stylesheet" href="{% static 'css/reserve.css' %}">
+<style>
+    table.table-seats {
+        position: relative;
+        border-collapse: collapse;
+        width: 100%;
+        text-align: center;
+
+    }
+
+    table.table-seats tr,
+    td {
+        border: solid 1px black;
+    }
+
+    td {
+        height: 50px;
+        vertical-align: middle !important;
+    }
+
+    .seat-item {
+        position: relative;
+    }
+
+    .seat-item input[type="checkbox"] {
+        display: none;
+    }
+
+    .seat-item label {
+        position: relative;
+        height: 40px;
+        width: 50px;
+        border: solid 1px black;
+        margin: 0 auto;
+        line-height: 35px;
+        cursor: pointer;
+        transition: all 0.5s ease;
+    }
+
+    .seat-item input[type="checkbox"]:checked+label {
+        position: relative;
+        background-color: #2BC36C;
+        color: #FFF;
+        transition: all 0.5s ease;
+    }
+
+    .card-body.seats {
+        max-width: 500px !important;
+        margin: 0 auto;
+    }
+
+    .simple-box {
+        position: relative;
+        text-align: center;
+        background-color: #2561C8;
+        border: 2px solid black;
+        color: #FFF;
+        padding: 10px 0 10px 0;
+        text-transform: uppercase;
+        font-weight: 800;
+    }
+
+    span.legend-box {
+        position: relative;
+        display: inline-block;
+        position: relative;
+        border: 1px solid black;
+        height: 20px;
+        width: 20px;
+        margin: 0 auto;
+    }
+
+    label.legend-label{
+        font-size: 0.7rem;
+        margin: 0 auto;
+        padding: 0;
+    }
+
+    .blue {
+        background-color: #2561C8 !important;
+    }
+    .green {
+        background-color: #2BC36C !important;
+    }
+    .red {
+        background-color: #FD1515 !important;
+    }
+  
+</style>
+{% endblock additional_css %}
+
+{% block content_body %}
+<div class="container-fluid p-3">
+    <div class="container">
+        <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+            <h1 class="display-4">Step 3: Seat Selection</h1>
+        </div>
+        <div class="row text-center">
+            <div class="col-4 bus-seats-list-container">
+
+            </div>
+           
+            <div class="col-8 passenger-details">
+                <div class="card card-warning shadow">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <b>Passengers Details</b>
+                        </div>
+                    </div>
+                    <div class="card-body">
+
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="row">
+            <!-- NOTE: Navigation -->
+            <div class="col-12 text-center mt-5">
+                <a href="{% url 'obb_app:step2' %}" class="custom-button-danger">
+
+                    <i class="far fa-arrow-alt-circle-left mr-2"></i>
+                    Back to Step 2
+                </a>
+                <a href="{% url 'obb_app:step4' %}" class="custom-button-danger">
+                    Proceed to Step 4
+
+                    <i class="far fa-arrow-alt-circle-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock content_body %}
+
+{% block rearscript %}
+
+<script src="{% static 'js/getcookies.js' %}"></script>
+<script src="{% static 'js/client/step3.js' %}"></script>
+{% endblock rearscript %}

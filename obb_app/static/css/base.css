@@ -1,0 +1,47 @@
+.slideshow-container {
+    position: relative;
+}
+
+.slideshow-container img {
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    border-radius: 5px;
+}
+
+.input-group {
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+}
+
+.input-group>.search-input {
+    position: relative;
+    height: 40px;
+    background: transparent;
+    border: solid 2px #FF0000;
+    border-radius: 3px;
+    padding: 0 8px 0 8px;
+    color: #FFF;
+}
+
+.input-group>.search-submit {
+    position: relative;
+    background: transparent;
+    border: solid 2px #FF0000;
+    border-radius: 3px;
+    padding: 0 8px 0 8px;
+    color: #FFF;
+    margin-left: 5px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.5s ease;
+}
+
+.input-group>.search-submit:hover {
+    background-color: #FF0000;
+    transition: all 0.5s ease;
+}
+
+li a {
+    font-size: 1.5rem !important;
+}

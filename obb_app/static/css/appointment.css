@@ -1,0 +1,12 @@
+ 
+.selected-date {
+    background: #EEEEEE !important;
+}
+
+.full-schedule-date {
+    background: #F4493F !important;
+}
+
+.current-date {
+    background: #357EBD !important;
+}
