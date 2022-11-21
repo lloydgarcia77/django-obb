@@ -204,6 +204,7 @@ def step4(request, *args, **kwargs):
     # ! make a boolean before serving to the front end
     # ! price per seat
     # ! user details
+    # ! validate all the data
     context = { 
     }
 

@@ -9,10 +9,10 @@ $(document).ready(function (e) {
             // "classname":"full-schedule-date"
 
         }
-        
+
     ]
-   
-    
+
+
     let zab_cal_settings = {
         legend: [
             { type: "block", label: "With Scheduled" },
@@ -36,7 +36,7 @@ $(document).ready(function (e) {
                 localStorage.setItem('selectedDate', selectedDate.toISOString());
                 // scheduleData.setDate = selectedDate; 
                 // loadSchedules();
-            } 
+            }
         },
         action_nav: function () {
             var id = this.id;
@@ -57,17 +57,32 @@ $(document).ready(function (e) {
     $("#table-routes").on("change", "input[type='radio']", function (e) {
         if ($(this).is(":checked")) {
             // scheduleData.setRoute = $(this).val();
-            localStorage.setItem('route', $(this).val())
+            Swal.fire({
+                title: 'Do you want to change route?',
+                html: `By changing routes all of your details setted on the current route will be <b class="text-danger">deleted</b>!`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Change Route'
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    localStorage.clear();
+                    localStorage.setItem('route', $(this).val())
+
+                }
+            })
         }
     })
 
     let zab_cal = $("#cal-schedule").zabuto_calendar(zab_cal_settings);
 
     $("input:radio[name='route']").filter(`[value='${localStorage.getItem('route')}']`).prop('checked', true)
-    function formatDate(date){
+    function formatDate(date) {
         let pDate = new Date(date);
         // NOTE YYYY-MM-DD 
-        let newDate = `${pDate.getFullYear()}-${pDate.getMonth()+1}-${pDate.getDate()}`; 
+        let newDate = `${pDate.getFullYear()}-${pDate.getMonth() + 1}-${pDate.getDate()}`;
         return newDate;
     }
 })  
