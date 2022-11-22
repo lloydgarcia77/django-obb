@@ -1,5 +1,6 @@
 $(document).ready(function (e) {
 
+    let previousSelectedRoute = "";
     let eventData = [
         {
             "date": formatDate(localStorage.getItem('selectedDate')),
@@ -11,7 +12,6 @@ $(document).ready(function (e) {
         }
 
     ]
-
 
     let zab_cal_settings = {
         legend: [
@@ -33,10 +33,11 @@ $(document).ready(function (e) {
                 // appointmentData.setDate = selectedDate;
                 toastr.error("Invalid Date!");
             } else {
-                localStorage.setItem('selectedDate', selectedDate.toISOString());
+                localStorage.setItem('selectedDate', `${selectedDate.getMonth() + 1}/${selectedDate.getDate()}/${selectedDate.getFullYear()}`);
                 // scheduleData.setDate = selectedDate; 
                 // loadSchedules();
             }
+
         },
         action_nav: function () {
             var id = this.id;
@@ -54,31 +55,76 @@ $(document).ready(function (e) {
         }
     };
 
+    let zab_cal = $("#cal-schedule").zabuto_calendar(zab_cal_settings);
+
+    getRoutes();
+
+
+    function getRoutes() {
+        $.ajax({
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken")
+            },
+            processData: false,
+            contentType: false,
+            type: 'POST',
+            dataType: 'json',
+            beforeSend: (data) => {
+
+            },
+            success: (data) => {
+                if (data.is_valid) {
+                    toastr.success("Routes has been loaded!")
+
+                    $("#table-routes").find('tbody').html(data.html_routes)
+
+                } else {
+                    toastr.error(`There's an error encountered: ${data.error}`)
+                }
+            },
+            error: (data) => {
+                toastr.error("There an error on your date or route!");
+            }
+        }).done((data) => {
+            previousSelectedRoute = localStorage.getItem('route')
+            $("input:radio[name='route']").filter(`[value='${previousSelectedRoute}']`).prop('checked', true)
+        })
+    }
+
     $("#table-routes").on("change", "input[type='radio']", function (e) {
         if ($(this).is(":checked")) {
             // scheduleData.setRoute = $(this).val();
-            Swal.fire({
-                title: 'Do you want to change route?',
-                html: `By changing routes all of your details setted on the current route will be <b class="text-danger">deleted</b>!`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Change Route'
-            }).then((result) => {
-                if (result.isConfirmed) {
 
-                    localStorage.clear();
-                    localStorage.setItem('route', $(this).val())
-
-                }
-            })
+            if (previousSelectedRoute) {
+                Swal.fire({
+                    title: 'Do you want to change route?',
+                    html: `By changing routes all of your details setted on the current route will be <b class="text-danger">deleted</b>!`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Change Route'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+    
+                        localStorage.clear(); 
+                        localStorage.setItem('route', $(this).val())
+                        previousSelectedRoute = $(this).val();
+                        $(zab_cal).empty().zabuto_calendar(zab_cal_settings);
+                    } else {
+                        $("input:radio[name='route']").filter(`[value='${previousSelectedRoute}']`).prop('checked', true);
+    
+                    }
+                })
+            }else{
+                localStorage.setItem('route', $(this).val())
+                previousSelectedRoute = $(this).val();
+            }
+            
         }
     })
 
-    let zab_cal = $("#cal-schedule").zabuto_calendar(zab_cal_settings);
 
-    $("input:radio[name='route']").filter(`[value='${localStorage.getItem('route')}']`).prop('checked', true)
     function formatDate(date) {
         let pDate = new Date(date);
         // NOTE YYYY-MM-DD 

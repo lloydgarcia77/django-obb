@@ -35,19 +35,7 @@ CISCO | Step 1
                         </tr>
                     </thead>
                     <tbody>
-                        {% for s in schedule %}
-                        <tr>
-                            <td>{{s.time}}</td>
-                            <td>{{s.source}}</td>
-                            <td>{{s.destination}}</td>
-                            <td>{{s.via}}</td>
-                            <td class="text-center"> 
-                                <input id="{{s.id}}" type="radio" name="route" value="{{s.id}}"> 
-                                <label for="{{s.id}}" class="custom-radio">                                    
-                                </label>
-                            </td>
-                        </tr>
-                        {% endfor %}
+                     
 
                     </tbody>
 

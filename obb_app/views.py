@@ -43,7 +43,7 @@ from django.templatetags.static import static
 from django.views.decorators.csrf import csrf_exempt
 
 import requests, logging, traceback, json, re
-import dateutil.parser 
+import dateutil.parser , string, shortuuid
 
 logger = logging.getLogger('django')
 # NOTE: Error Pages
@@ -84,13 +84,94 @@ def login_page(request):
 
 # NOTE Admin
 @login_required
-def administrator_index(request):
+def administrator_index(request, *args, **kwargs):
     template_name = 'app/admin/index.html'
     user = get_object_or_404(models.User, email=request.user.email)
 
     context = {
         'user': user,
     }
+
+    return render(request,template_name,context)
+
+@login_required
+def administrator_schedules(request, *args, **kwargs):
+    template_name = 'app/admin/schedules/schedule.html'
+    user = get_object_or_404(models.User, email=request.user.email)
+ 
+    search = request.GET.get('search','')
+
+    objects = models.Booking.objects.all().order_by('-date_created') 
+
+    if request.method == 'GET':
+        if search.strip(): 
+            objects = objects.filter(
+                Q(booking__icontains=search) |
+                Q(id__icontains=search) |  
+
+                Q(scheduled_route__source__name__icontains=search) | 
+                Q(scheduled_route__destination__name__icontains=search) | 
+                Q(scheduled_route__via__name__icontains=search) | 
+
+                Q(bus__name__icontains=search) |  
+                Q(bus__driver_name__icontains=search) |  
+                Q(bus__conductor_name__icontains=search) |  
+                Q(bus__type__icontains=search) |  
+                Q(bus__plate_no__icontains=search) |  
+                Q(reference_id__icontains=search) 
+                )
+
+    page = request.GET.get('page', 1)
+    
+    paginator = Paginator(objects, 5)
+
+    try:
+        query = paginator.page(page)
+    except PageNotAnInteger:
+        query = paginator.page(1)
+    except EmptyPage:
+        query = paginator.page(paginator.num_pages)
+     
+    context = {
+        'user': user,  
+        'query': query,
+    }
+
+  
+
+    return render(request,template_name,context)
+
+
+@login_required
+def administrator_schedules_manage(request, *args, **kwargs):
+    template_name = 'app/admin/schedules/manage.html'
+    user = get_object_or_404(models.User, email=request.user.email)
+    id = kwargs.get('id')
+    booking = get_object_or_404(models.Booking, id=id)
+
+
+    if request.method == 'POST':
+        _approve = request.POST.get('_approve', None)
+        _delete = request.POST.get('_delete', None)
+        _send_mail = request.POST.get('_send_mail', None)
+ 
+        if isinstance(_approve, str):
+            booking.status = models.Booking.APPROVED if booking.status == models.Booking.PENDING else models.Booking.PENDING 
+            booking.save()
+            messages.success(request, f"Booking status has been changed to: {booking.status}")
+        if isinstance(_delete, str): 
+            booking.delete()
+            messages.error(request, "Booking has been deleted!")
+        if isinstance(_send_mail, str): 
+            messages.info(request, "Email has been sent to each users!")
+        return HttpResponseRedirect(reverse('obb_app:administrator_schedules'))
+
+    context = {
+        'user': user,  
+        'booking': booking,
+    }
+
+  
 
     return render(request,template_name,context)
 
@@ -108,17 +189,46 @@ def index(request, *args, **kwargs):
     return render(request, template_name, context)
 
 
+def search_results(request, *args, **kwargs):
+    template_name = 'app/client/booking_search_result.html'
+
+    if request.method == 'GET':
+        search_val = request.GET.get('search_val') 
+        booking_list = models.Booking.objects.filter(Q(booking=search_val))
+
+
+    context = { 
+        'booking_list': booking_list,
+    }
+
+    return render(request, template_name, context)
+
+
 def step1(request, *args, **kwargs):
     template_name = 'app/client/step1.html' 
     schedule = models.DailySchedule.objects.all().order_by('time')
     data = dict()
+ 
+    if request.is_ajax():
+        if request.method == 'POST':
+            # ! date of full
+            now = datetime.now()
+            timetoday = now.strftime("%H:%M:%S")  
+            schedule = [
+                {
+                    'id': s.id,
+                    'source': s.source,
+                    'destination': s.destination,
+                    'via': s.via,
+                    'time': s.time, 
+                    'available': s.time > datetime.strptime(timetoday, "%H:%M:%S").time(),
+                } for s in schedule
+            ]
+            data['is_valid'] = True
+            data['html_routes'] = render_to_string('app/client/step1_route_list.html', {'schedule': schedule}, request)
 
-    # if request.is_ajax():
-    #     if request.method == 'POST':
+        return JsonResponse(data)
 
-    #         print(request.POST)
-    #         data['is_valid'] = True
-    #         return JsonResponse(data)
     context = {
         'schedule': schedule,
     }
@@ -132,13 +242,10 @@ def step2(request, *args, **kwargs):
     if request.is_ajax():
         if request.method == 'POST':
             date = request.POST.get('date','')
-            route = request.POST.get('route','')
-             
-            #  ! msut be apply unti step 4
-            d = dateutil.parser.isoparse(date)
-            schedule = get_object_or_404(models.DailySchedule, id=route)
-            # print(d.strftime('%Y-%m-%d')) 
+            route = request.POST.get('route','') 
 
+            d = datetime.strptime(date, '%m/%d/%Y')
+            schedule = get_object_or_404(models.DailySchedule, id=route) 
             schedule = [
                 {   
                     'id': s.id,
@@ -148,11 +255,10 @@ def step2(request, *args, **kwargs):
                     'type': s.type,   
                     'plate_no': s.plate_no,  
                     'total_seat_no': s.fk_bs_bus.all().count(),
-                    'total_avail_seat_no': models.BusSeat.objects.filter(Q(bus=s) & Q(occupied=False)).count()
+                    # ! occupied must reflect
+                    'total_avail_seat_no': s.fk_bs_bus.all().count()
                 } for s in schedule.bus.all()
-            ]
- 
-
+            ] 
             data['html_buses'] = render_to_string('app/client/step2_bus_list.html', {'schedule': schedule}, request)
             data['is_valid'] = True
         return JsonResponse(data)
@@ -160,6 +266,7 @@ def step2(request, *args, **kwargs):
     }
 
     return render(request, template_name, context)
+
 
 def step3(request, *args, **kwargs):
     template_name = 'app/client/step3.html'  
@@ -172,40 +279,223 @@ def step3(request, *args, **kwargs):
             bus = request.POST.get('bus','')
               
             #  ! msut be apply unti step 4
-            d = dateutil.parser.isoparse(date)
+            # d = dateutil.parser.isoparse(date)
+            d = datetime.strptime(date, '%m/%d/%Y')
             schedule = get_object_or_404(models.DailySchedule, id=route)
             bus = get_object_or_404(models.Bus, id=bus) 
             
             bus_seat = models.BusSeat.objects.all().filter(bus=bus)
  
             sorted_bus_seat = sorted(bus_seat, key=lambda i : int(re.sub('\D', '', i.name)))
-
-            # for i in sorted_bus_seat:
-            #     print(i.name)
-
+ 
             data['html_seats'] = render_to_string('app/client/step3_seat_list.html', 
             {'sorted_bus_seat': sorted_bus_seat}, request)
             data['is_valid'] = True
 
         return JsonResponse(data)
-
-
-  
+ 
     context = { 
         
     }
 
     return render(request, template_name, context)
 
+
+def __check_mail(email):
+        regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        return True if re.fullmatch(regex, email) else False
+
+
+def __generate_unique_id():
+    alphabet = string.ascii_lowercase + string.digits
+    su = shortuuid.ShortUUID(alphabet=alphabet)
+    return su.random(length=8)
+
+
 def step4(request, *args, **kwargs):
     template_name = 'app/client/step4.html' 
+    data = dict()
     
-    # ! pass time must not be able to be selcted because
-    # ! make a boolean before serving to the front end
-    # ! price per seat
-    # ! user details
-    # ! validate all the data
+    if request.is_ajax():
+        if request.method == 'POST': 
+            route = request.POST.get('route','')
+            bus = request.POST.get('bus','')
+            
+            selectedDate = request.POST.get('selectedDate','')
+            seat_details = request.POST.get('seat_details','')
+
+            try:
+                d = datetime.strptime(selectedDate, '%m/%d/%Y') 
+                d = make_aware(d)
+
+             
+                # d = dateutil.parser.parse(selectedDate)
+                # print(d.strftime('%Y-%m-%d %I:%M:%S %p')) 
+                route = get_object_or_404(models.DailySchedule, id=route, bus__id=bus)
+                bus = get_object_or_404(models.Bus, id=bus)
+ 
+                if datetime.now().time() > route.time:
+                    raise Exception('Invalid Time')
+                # ! available seats per dy
+                # available_seats = [
+                #     b.id for b in bus.fk_bs_bus if b.occupied
+                # ]
+               
+                # NOTE: check the seat allocation
+                seat_details = json.loads(seat_details) 
+
+                for s in seat_details:
+                    if not __check_mail(s.get('email')):
+                        raise Exception('Invalid Email') 
+                    int(s.get('age'))
+
+                # NOTE: After validation
+                # NOTE: Computing for the total
+                # print(seat_details)
+                # seat_details = map(lambda i: {
+                #     'name': i.get('name'),
+                #     'email': i.get('email'),
+                #     'age': i.get('age'),
+                #     'discount': '20%' if (int(i.get('age')) <= 18 or int(i.get('age')) >= 60 ) else '0',
+                #     'sub_total': (route.price * 0.20) if (int(i.age) <= 18 or int(i.get('age')) >= 60) else route.price
+                # }, seat_details)
+
+                # total = map(lambda i: float(i.get('sub_total')), seat_details)
+
+                booking_id = __generate_unique_id()
+                # NOTE Setting the details on the page
+                booking_data = {
+                    'booking_id': booking_id,
+                    'route': route,
+                    'bus': bus, 
+                    'datetoday': datetime.now().strftime('%b %d,  %Y %I:%M %p'),
+                    'seat_details': seat_details, 
+                    'total_amt': route.price * len(seat_details),
+                    'total_passengers': len(seat_details),
+                }
+
+                data['html_booking_confirmation'] = render_to_string('app/client/step4_booking_confirmation.html', 
+                {'booking_data': booking_data}, request)
+                
+                data['passenger_details'] = seat_details 
+                data['bookid'] = booking_id
+                data['is_valid'] = True
+ 
+            except Exception as e:
+                data['is_valid'] = False
+                data['message'] = f'Error cannot proceed! {e}'  
+        return JsonResponse(data)
     context = { 
     }
 
     return render(request, template_name, context)
+
+
+def step5(request, *args, **kwargs):
+    template_name = 'app/client/step5.html' 
+    data = dict()   
+
+    if request.is_ajax():
+        if request.method == 'POST':
+            route = request.POST.get('route','')
+            bus = request.POST.get('bus','')
+            booking = request.POST.get('booking','')
+            
+            selectedDate = request.POST.get('selectedDate','')
+            seat_details = request.POST.get('seat_details','')
+
+            try:
+                d = datetime.strptime(selectedDate, '%m/%d/%Y') 
+                d = make_aware(d) 
+
+                route = get_object_or_404(models.DailySchedule, id=route, bus__id=bus)
+                bus = get_object_or_404(models.Bus, id=bus)
+ 
+                if datetime.now().time() > route.time:
+                    raise Exception('Invalid Time')
+                # ! available seats per dy
+                # available_seats = [
+                #     b.id for b in bus.fk_bs_bus if b.occupied
+                # ]
+               
+                # NOTE: check the seat allocation
+                seat_details = json.loads(seat_details) 
+
+                for s in seat_details:
+                    if not __check_mail(s.get('email')):
+                        raise Exception('Invalid Email') 
+                    int(s.get('age'))
+
+
+                models.Booking.objects.create(
+                    booking=booking,
+                    scheduled_route=route,
+                    bus=bus,
+                    date=d,
+                    time=route.time,
+                    total_cost=len(seat_details) * route.price,
+                    seat_person=seat_details,
+                )
+                data['is_valid'] = True
+
+            except Exception as e:
+                data['is_valid'] = False
+                data['message'] = f'Error cannot proceed! {e}' 
+                print(e)
+        
+        return JsonResponse(data)
+
+    
+    context = { 
+    }
+
+    return render(request, template_name, context)
+
+
+def step_final(request, *args, **kwargs):
+    data = dict()
+
+
+    if request.is_ajax():
+        if request.method == 'POST':
+            booking_id = request.POST.get('booking_id')
+            try:
+                booking = get_object_or_404(models.Booking, booking=booking_id, is_paid=False, reference_id=None)
+
+
+                data['html_booking_details'] = render_to_string('app/client/step5_booking_details.html', 
+                                        {'booking': booking}, request)
+                data['booking_id'] = booking_id
+                data['is_valid'] = True
+                data['message'] = f'Booking ID has been found! Please proceed to your payment!'
+            except Exception as e:
+                data['is_valid'] = False
+                data['message'] = f'There\'s an Error: {e} encountered!'
+        return JsonResponse(data)
+    else:
+        raise Http404
+
+
+
+def update_ref_id(request, *args, **kwargs):
+    data = dict()
+
+    if request.is_ajax():
+        if request.method == 'POST':
+            booking_id = request.POST.get('booking_id')
+            payment_ref_id = request.POST.get('payment_ref_id')
+            try:
+                booking = get_object_or_404(models.Booking, booking=booking_id, is_paid=False, reference_id=None)
+                booking.is_paid = True
+                booking.datetime_paid = timezone.now()
+                booking.reference_id = payment_ref_id
+                booking.save()
+ 
+                data['is_valid'] = True
+                data['message'] = f'Your payment details has been successful!'
+            except Exception as e:
+                data['is_valid'] = False
+                data['message'] = f'There\'s an Error: {e} encountered!' 
+        return JsonResponse(data)
+    else:
+        raise Http404()

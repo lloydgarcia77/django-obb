@@ -9,6 +9,7 @@ from django.utils.text import slugify
 from django.urls import reverse
 from django.utils.timezone import make_aware, now  
 from datetime import date, datetime  
+from django.utils import timezone
 import uuid, os
 
 
@@ -154,7 +155,7 @@ class BusSeat(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4) 
     bus = models.ForeignKey(Bus, related_name='fk_bs_bus', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
-    occupied = models.BooleanField(default=False)
+    # occupied = models.BooleanField(default=False)
     date_created = models.DateTimeField(auto_now_add=True)
     
     def __str__(self): 
@@ -175,6 +176,7 @@ class Route(models.Model):
     class Meta:
         ordering = ['-date_created']
 
+ 
 
 class DailySchedule(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)    
@@ -182,6 +184,7 @@ class DailySchedule(models.Model):
     destination = models.ForeignKey(Route, related_name='fk_ds_destination', on_delete=models.CASCADE)
     via = models.ForeignKey(Route, related_name='fk_ds_via', on_delete=models.CASCADE)
     bus = models.ManyToManyField(Bus, related_name='fk_sd_m2m_bus')
+    price = models.FloatField(default=0)
     time = models.TimeField() 
     date_created = models.DateTimeField(auto_now_add=True)
     
@@ -201,14 +204,18 @@ class Booking(models.Model):
         (APPROVED,'approved'),
     )
     id = models.UUIDField(primary_key=True, default=uuid.uuid4) 
+    booking = models.CharField(max_length=250, unique=True, blank=True, null=True)
     scheduled_route = models.ForeignKey(DailySchedule, related_name='fk_booking_route', on_delete=models.CASCADE)
     bus = models.ForeignKey(Bus, related_name='fk_booking_bus', on_delete=models.CASCADE)
     # ! https://bobbyhadz.com/blog/python-add-time-to-datetime-object
-    datetime = models.DateTimeField() 
+    date = models.DateField(blank=True, null=True) 
+    time = models.TimeField(blank=True, null=True)
     is_paid = models.BooleanField(default=False)
     total_cost = models.FloatField()
     seat_person = models.JSONField()
+    reference_id = models.CharField(blank=True, max_length=50, null=True)
     status = models.CharField(max_length=50, choices=STATUS_LIST, default=PENDING)
+    datetime_paid = models.DateTimeField(blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -217,7 +224,8 @@ class Booking(models.Model):
     class Meta:    
         
         ordering = ['-date_created']
-
+        unique_together = ('date', 'time',)
+ 
 class Receipt(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4) 
     booking = models.ForeignKey(Booking, related_name="fk_receipt_booking", on_delete=models.SET_NULL, blank=True, null=True)

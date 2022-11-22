@@ -1,0 +1,171 @@
+{% extends 'app/admin/base.html' %}
+{% load static %}
+{% load humanize %}
+{% load custom_tags %}
+
+{% block title %}
+CISCO | Admin Schedule
+{% endblock title%}
+
+{% block additional_css %}
+
+<style>
+    div.container {
+        max-width: 100%;
+    }
+</style>
+
+{% endblock additional_css %}
+
+{% block content_body %}
+<div class="container-fluid p-3">
+    <div class="container">
+
+        <nav aria-label="breadcrumb" class="  px-3 py-3 pt-md-5 pb-md-4 mx-auto ">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'obb_app:administrator_index' %}">Home</a></li> 
+                <li class="breadcrumb-item active" aria-current="page"><a href="{% url 'obb_app:administrator_schedules' %}">Booking Schedules</a></li>
+            </ol>
+        </nav>
+        <div class="row ">
+            <div class="col-md-12">
+                
+                {% include 'partials/_messages.html' %}
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <b>Booking Schedule Appointment List</b>
+                        </div>
+                        <div class="card-tools">
+                            <form method="GET">
+                                <div class="input-group input-group-sm">
+                                    <input type="search" name="search" class="form-control float-right"
+                                        placeholder="Search" value="{{request.GET.search}}">
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn btn-default">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+
+                    </div>
+                    <div class="card-body table-responsive p-0">
+                        <table class="table table-striped table-bordered table-hover text-nowrap text-center">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Booking ID</th>
+                                    <th colspan="3">Route</th>
+                                    <th colspan="5">Bus Details</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Is Paid</th>
+                                    <th>Total Cost</th>
+                                    <th>Ref ID</th>
+                                    <th>Status</th>
+                                    <th>Paid At</th>
+                                    <th>Date Created</th>
+                                </tr>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th>Source</th>
+                                    <th>Dest</th>
+                                    <th>VIA</th>
+
+                                    <th>Driver</th>
+                                    <th>Conductor</th>
+                                    <th>Type</th>
+                                    <th>Seats</th>
+                                    <th>Plate #</th>
+
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th class="text-center" style="width: 50px">
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for q in query %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'obb_app:administrator_schedules_manage' q.id %}">
+
+                                            {{ q.id }}
+                                        </a>
+                                    </td>
+                                    <td>{{ q.booking }}</td>
+                                    <td>{{ q.scheduled_route.source }}</td>
+                                    <td>{{ q.scheduled_route.destination }}</td>
+                                    <td>{{ q.scheduled_route.via }}</td>
+
+                                    <td>{{ q.bus.driver_name }}</td>
+                                    <td>{{ q.bus.conductor_name }}</td>
+                                    <td>{{ q.bus.type }}</td>
+                                    <td>{{ q.bus.fk_bs_bus.all.count }}</td>
+                                    <td>{{ q.bus.plate_no }}</td>
+
+                                    <td>{{ q.date }}</td>
+                                    <td>{{ q.time }}</td>
+                                    <td>
+                                        {% if q.is_paid %}
+                                        <span class="badge badge-success ">
+                                            Paid
+                                            <i class="fas fa-check"></i>
+                                        </span>
+                                        {% else %}
+                                        <span class="badge badge-danger ">
+                                            Unpaid
+                                            <i class="fas fa-times"></i>
+                                        </span>
+                                        {% endif %}
+
+                                    </td>
+                                    <td>₱ {{ q.total_cost }}</td>
+                                    <td>{{ q.reference_id }}</td>
+                                    <td class="text-uppercase">
+                                        {% if q.status == 'approved' %}
+                                        <span class="badge badge-success ">
+                                            {{q.status}}
+                                            <i class="fas fa-check "></i>
+                                        </span>
+                                        {% elif q.status == 'pending' %}
+                                        <span class="badge badge-warning ">
+                                            {{q.status}}
+                                            <i class="fas fa-question-circle "></i>
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ q.datetime_paid }}</td>
+                                    <td>{{ q.date_created }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="18" class="text-center text-danger">No Available Records!</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer">
+                        {% include 'paginators/paginate.html' %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content_body %}
+
+{% block rearscript %}
+{% endblock rearscript %}

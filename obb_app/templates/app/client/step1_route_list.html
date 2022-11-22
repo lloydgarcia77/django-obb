@@ -1,0 +1,21 @@
+{% load static %}
+{% load humanize %}
+{% load custom_tags %}
+
+{% for s in schedule %}
+<tr>
+    <td>{{s.time}}</td>
+    <td>{{s.source}}</td>
+    <td>{{s.destination}}</td>
+    <td>{{s.via}}</td>
+    <td class="text-center"> 
+        {% if s.available %}
+        <input id="{{s.id}}" type="radio" name="route" value="{{s.id}}"> 
+        <label for="{{s.id}}" class="custom-radio">                                    
+        </label>
+        {% else %}
+        <i class="fas fa-times-circle text-danger"></i>
+        {% endif %}
+    </td>
+</tr>
+{% endfor %}

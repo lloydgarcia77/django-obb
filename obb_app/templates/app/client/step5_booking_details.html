@@ -1,0 +1,144 @@
+{% load static %}
+{% load humanize %}
+{% load custom_tags %}
+
+
+<table class="table table-striped table-bordered">
+    <tbody>
+
+        <tr>
+            <td colspan="2" class="text-center text-uppercase">Route Details:</td>
+        </tr>
+        <tr>
+            <td>Source:</td>
+            <td>{{booking.scheduled_route.source}}</td>
+        </tr>
+        <tr>
+            <td>Destination:</td>
+            <td>{{booking.scheduled_route.destination}}</td>
+        </tr>
+        <tr>
+            <td>VIA:</td>
+            <td>{{booking.scheduled_route.via}}</td>
+        </tr>
+        <tr>
+            <td>Time:</td>
+            <td>{{booking.scheduled_route.time}}</td>
+        </tr>
+        <tr>
+            <td>Date:</td>
+            <td>{{booking.date}}</td>
+        </tr>
+
+        <tr>
+            <td colspan="2" class="text-center text-uppercase">Bus Details:</td>
+        </tr>
+        <tr>
+            <td>Bus Name:</td>
+            <td>{{booking.bus.name}}</td>
+        </tr>
+        <tr>
+            <td>Driver Name:</td>
+            <td>{{booking.bus.driver_name}}</td>
+        </tr>
+        <tr>
+            <td>Conductor Name:</td>
+            <td>{{booking.bus.conductor_name}}</td>
+        </tr>
+        <tr>
+            <td>Type:</td>
+            <td>{{booking.bus.type}}</td>
+        </tr>
+        <tr>
+            <td>Plate #:</td>
+            <td>{{booking.bus.plate_no}}</td>
+        </tr>
+    </tbody>
+</table>
+
+<hr>
+
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr class="bg-warning text-uppercase">
+            <th colspan="6" class="text-center">
+                Passengers / Pricing Details
+            </th>
+        </tr>
+        <tr>
+            <td>Price (Per Head):</td>
+            <td colspan="5" class="text-right ">
+                <span class="badge badge-danger text-lg">
+                    ₱ {{ booking.scheduled_route.price }}
+                </span>
+
+            </td>
+        </tr>
+        <tr>
+            <td>Seat #</td>
+            <td>Name</td>
+            <td>Email</td>
+            <td>Age</td>
+            <td>Discount Type</td>
+        </tr>
+
+
+    </thead>
+    <tbody>
+        {% for p in booking.seat_person %}
+        <tr>
+            <td>{{p.seat}}</td>
+            <td>{{p.name}}</td>
+            <td>{{p.email}}</td>
+            <td>{{p.age}}</td>
+            <td>{{p.discount_type}}</td>
+        </tr>
+        {% endfor %}
+
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="2">Total Passengers:
+
+                <span class="badge badge-success text-lg float-right">
+                    {{ booking.seat_person|length}}
+                </span>
+            </td>
+            <td colspan="3">Total Amount:
+                <span class="badge badge-danger text-lg float-right">₱ {{ booking.total_cost}}</span>
+            </td>
+        </tr>
+    </tfoot>
+
+
+
+</table>
+<hr>
+<h1 class="text-center">
+    Payment Method
+</h1>
+<p class="text-center">
+    Please enter the reference ID of your payment below:
+</p>
+<img src="{% static 'images/ciscogcash.jpg' %}" class="rounded mx-auto d-block" alt="GCash QR Code" height="300"
+    width="300">
+
+
+<div class="container text-center">
+
+    <form method="POST" id="form-g-cash-ref-id">
+        {% csrf_token %}
+        <div class="form-group text-center">
+            <input id="g_cash_ref_id" name="g_cash_ref_id" type="text"
+                class="form-control form-control-lg m-0  text-center" placeholder="GCash Reference ID">
+            <label class="text-center" for="g_cash_ref_id">GCash Reference ID:</label>
+        </div>
+        <button submit-payment-ref-id type="submit" class="btn btn-lg btn-primary">
+            <i class="fas fa-save mr-1"></i>
+            
+            Submit
+        </button>
+
+    </form>
+</div>
+<!-- form-control form-control-lg text-lg w-50 m-0 -->

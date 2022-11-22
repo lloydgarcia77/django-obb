@@ -14,8 +14,7 @@ $(document).ready(function (e) {
                     details = JSON.parse(details);
                     details = details.filter((e,i) => (
                         e.email && e.name && e.age && (validateEmail(e.email) && typeof parseInt(e.age) === 'number')
-                    ))
-                    console.log(details);
+                    )) 
                 } catch (e) {
                     details = [];
                 }

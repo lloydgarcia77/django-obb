@@ -36,11 +36,11 @@
 
                     </ul>
                 </div>
-                <form method="POST">
+                <form method="GET" action="{% url 'obb_app:search_results' %}">
                     {% csrf_token %}
                     <div class="input-group">
 
-                        <input type="text" name="search-tracker" class="search-input" placeholder="Enter your tracker id here." required>
+                        <input type="text" name="search_val" class="search-input" placeholder="Enter your tracker id here." required >
                         <button type="submit" class="search-submit">Search</button>
                     </div>
                 </form>

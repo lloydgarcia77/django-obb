@@ -1,0 +1,220 @@
+{% extends 'app/admin/base.html' %}
+{% load static %}
+{% load humanize %}
+{% load custom_tags %}
+
+{% block title %}
+CISCO | Admin Schedule Manage
+{% endblock title%}
+
+{% block additional_css %}
+
+<style>
+    div.container {
+        max-width: 100%;
+    }
+</style>
+
+{% endblock additional_css %}
+
+{% block content_body %}
+<div class="container-fluid p-3">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="  px-3 py-3 pt-md-5 pb-md-4 mx-auto ">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'obb_app:administrator_index' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'obb_app:administrator_schedules' %}">Booking Schedules</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page"><a
+                        href="{% url 'obb_app:administrator_schedules_manage' booking.id %}">Manage</a></li>
+            </ol>
+        </nav>
+        <div class="card">
+            <form method="POST">
+                {% csrf_token %}
+                <div class="card-body">
+
+                    {% include 'partials/_messages.html' %}
+                    {% include 'partials/_form_errors.html' %}
+
+                    <table class="table table-striped table-bordered">
+                        <tbody>
+
+                            <tr>
+                                <td colspan="2" class="text-center text-uppercase">
+                                    <b>Booking Details:</b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Payment Status:</td>
+                                <td>
+                                    {% if booking.is_paid %}
+                                    <span class="badge badge-success text-lg">
+                                        Paid
+                                        <i class="fas fa-check ml-2"></i>
+                                    </span>
+                                    {% else %}
+                                    <span class="badge badge-danger text-lg">
+                                        Unpaid
+                                        <i class="fas fa-times ml-2"></i>
+                                    </span>
+                                    {% endif %}
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Booking Approval:</td>
+                                <td>
+
+                                    {% if booking.status == 'approved' %}
+                                    <span class="badge badge-success text-lg">
+                                        {{booking.status}}
+                                        <i class="fas fa-check ml-2"></i>
+                                    </span>
+                                    {% elif booking.status == 'pending' %}
+                                    <span class="badge badge-warning text-lg">
+                                        {{booking.status}}
+                                        <i class="fas fa-question-circle ml-2"></i>
+                                    </span>
+                                    {% endif %}
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="text-center text-uppercase">
+                                    <b>Route Details:</b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Source:</td>
+                                <td>{{booking.scheduled_route.source}}</td>
+                            </tr>
+                            <tr>
+                                <td>Destination:</td>
+                                <td>{{booking.scheduled_route.destination}}</td>
+                            </tr>
+                            <tr>
+                                <td>VIA:</td>
+                                <td>{{booking.scheduled_route.via}}</td>
+                            </tr>
+                            <tr>
+                                <td>Time:</td>
+                                <td>{{booking.scheduled_route.time}}</td>
+                            </tr>
+                            <tr>
+                                <td>Date:</td>
+                                <td>{{booking.date}}</td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" class="text-center text-uppercase">
+                                    <b>Bus Details:</b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Bus Name:</td>
+                                <td>{{booking.bus.name}}</td>
+                            </tr>
+                            <tr>
+                                <td>Driver Name:</td>
+                                <td>{{booking.bus.driver_name}}</td>
+                            </tr>
+                            <tr>
+                                <td>Conductor Name:</td>
+                                <td>{{booking.bus.conductor_name}}</td>
+                            </tr>
+                            <tr>
+                                <td>Type:</td>
+                                <td>{{booking.bus.type}}</td>
+                            </tr>
+                            <tr>
+                                <td>Plate #:</td>
+                                <td>{{booking.bus.plate_no}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <hr>
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr class="bg-warning text-uppercase">
+                                <th colspan="6" class="text-center">
+                                    Passengers / Pricing Details
+                                </th>
+                            </tr>
+                            <tr>
+                                <td>Price (Per Head):</td>
+                                <td colspan="5" class="text-right ">
+                                    <span class="badge badge-danger text-lg">
+                                        ₱ {{ booking.scheduled_route.price }}
+                                    </span>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Seat #</td>
+                                <td>Name</td>
+                                <td>Email</td>
+                                <td>Age</td>
+                                <td>Discount Type</td>
+                            </tr>
+
+
+                        </thead>
+                        <tbody>
+                            {% for p in booking.seat_person %}
+                            <tr>
+                                <td>{{p.seat}}</td>
+                                <td>{{p.name}}</td>
+                                <td>{{p.email}}</td>
+                                <td>{{p.age}}</td>
+                                <td>{{p.discount_type}}</td>
+                            </tr>
+                            {% endfor %}
+
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2">Total Passengers:
+
+                                    <span class="badge badge-success text-lg float-right">
+                                        {{ booking.seat_person|length}}
+                                    </span>
+                                </td>
+                                <td colspan="3">Total Amount:
+                                    <span class="badge badge-danger text-lg float-right">₱ {{ booking.total_cost}}</span>
+                                </td>
+                            </tr>
+                        </tfoot>
+
+
+
+                    </table>
+
+                </div>
+                <div class="card-footer">
+                    {% if booking.status == 'pending' %}
+                    <button type="submit" class="btn btn-success" name="_approve">
+                        <i class="fas fa-thumbs-up mr-1"></i>
+                        Approve
+                    </button>
+                    
+                    {% elif booking.status == 'approved' %}
+                    <button type="submit" class="btn btn-danger" name="_approve">
+                        <i class="fas fa-thumbs-down mr-1"></i>
+                        Disapprove
+                    </button>
+                    {% endif %} 
+                    <button type="submit" class="btn btn-danger" name="_delete"><i
+                            class="fas fa-trash-alt mr-1"></i> Delete</button>
+                    <button type="submit" class="btn btn-primary" name="_send_mail"><i
+                            class="fas fa-envelope mr-1"></i> Send Mail</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+{% endblock content_body %}
+{% block rearscript %}
+{% endblock rearscript %}
