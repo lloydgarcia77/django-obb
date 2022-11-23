@@ -277,11 +277,16 @@ def step1(request, *args, **kwargs):
     template_name = 'app/client/step1.html' 
     schedule = models.DailySchedule.objects.all().order_by('time')
     data = dict()
+    
  
     if request.is_ajax():
-        if request.method == 'POST':
-            # ! date of full
+        if request.method == 'POST': 
+            
             now = datetime.now()
+            date = request.POST.get('date', now) 
+
+            d = datetime.strptime(date, '%m/%d/%Y')   
+ 
             timetoday = now.strftime("%H:%M:%S")  
             schedule = [
                 {
@@ -292,7 +297,7 @@ def step1(request, *args, **kwargs):
                     'time': s.time, 
                     # 'available': True,
                     # ! do not forget th
-                    'available': s.time > datetime.strptime(timetoday, "%H:%M:%S").time(),
+                    'available': s.time > datetime.strptime(timetoday, "%H:%M:%S").time() if d.date() == now.date() else True,
                 } for s in schedule
             ]
             data['is_valid'] = True
@@ -321,6 +326,8 @@ def __get_bus_seat_availables(booking, bus):
     if bool(match_bus): 
         return (bus_seat_count - len(match_bus[0].seat_person)) 
     return bus_seat_count
+
+
 
 def step2(request, *args, **kwargs):
     template_name = 'app/client/step2.html' 

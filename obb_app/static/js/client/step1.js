@@ -32,6 +32,8 @@ $(document).ready(function (e) {
                 toastr.error("Invalid Date!");
             } else {
                 localStorage.setItem('selectedDate', `${selectedDate.getMonth() + 1}/${selectedDate.getDate()}/${selectedDate.getFullYear()}`);
+                
+                window.location.reload();
                 // scheduleData.setDate = selectedDate; 
                 // loadSchedules();
             }
@@ -59,12 +61,15 @@ $(document).ready(function (e) {
 
 
     function getRoutes() {
+        let form = new FormData();
+        form.append('date', localStorage.getItem('selectedDate'))
         $.ajax({
             headers: {
                 "X-CSRFToken": getCookie("csrftoken")
             },
             processData: false,
             contentType: false,
+            data: form,
             type: 'POST',
             dataType: 'json',
             beforeSend: (data) => {
