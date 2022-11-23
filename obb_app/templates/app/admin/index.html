@@ -8,12 +8,178 @@ CISCO | Admin Index
 {% endblock title%}
 
 {% block additional_css %}
+<style>
+    div.container {
+        max-width: 100%;
+    }
 
+    div.clock {
+        background-color: #000;
+        border-radius: 5px;
+        color: #17D4FE;
+        font-size: 60px;
+        font-family: "Courier New", monospace;
+        letter-spacing: 7px;
+        text-align: center;
+    }
+</style>
 {% endblock additional_css %}
 
 {% block content_body %}
+<div class="container-fluid p-3">
+    <div class="container">
+        <nav aria-label="breadcrumb" class="  px-3 py-3 pt-md-5 pb-md-4 mx-auto ">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item active" aria-current="page"><a
+                        href="{% url 'obb_app:administrator_index' %}">Home</a></li>
+            </ol>
+        </nav>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="clock"> 
+                </div>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-info"><i class="fas fa-bus-alt"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Buses</span>
+                        <span class="info-box-number">{{total_bus|intcomma}} </span>
+                    </div>
 
+                </div>
+
+            </div>
+
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-success"><i class="fas fa-road"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Routes</span>
+                        <span class="info-box-number">{{total_routes|intcomma}}</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-warning"><i class="fas fa-calendar-alt"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Schedules</span>
+                        <span class="info-box-number">{{total_daily_schedule|intcomma}}</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-danger"><i class="fas fa-book"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Bookings</span>
+                        <span class="info-box-number">{{total_bookings|intcomma}}</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-success"><i class="fas fa-thumbs-up"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Approved</span>
+                        <span class="info-box-number">{{total_bookings|intcomma}}</span>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-warning"><i class="fas fa-hand-paper"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Pending</span>
+                        <span class="info-box-number">{{total_bookings|intcomma}}</span>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-orange"><i class="fas fa-money-bill-wave"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Sales</span>
+                        <span class="info-box-number">{{total_cost|intcomma}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-navy"><i class="fas fa-hand-holding-usd"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Paid</span>
+                        <span class="info-box-number">{{total_paid|intcomma}}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box">
+                    <span class="info-box-icon bg-purple"><i class="fas fa-hand-holding"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Unpaid</span>
+                        <span class="info-box-number">{{total_unpaid|intcomma}}</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
 {% endblock content_body %}
 
 {% block rearscript %}
+<script>
+    $(document).ready(function () {
+        function showTime() {
+            var date = new Date();
+            var h = date.getHours(); // 0 - 23
+            var m = date.getMinutes(); // 0 - 59
+            var s = date.getSeconds(); // 0 - 59
+            var month = date.getMonth() + 1;
+            var dom = date.getDate();
+            var year = date.getFullYear();
+            var session = "AM";
+
+            if (h == 0) {
+                h = 12;
+            }
+
+            if (h > 12) {
+                h = h - 12;
+                session = "PM";
+            }
+
+            h = (h < 10) ? "0" + h : h;
+            m = (m < 10) ? "0" + m : m;
+            s = (s < 10) ? "0" + s : s; 
+            var time =  `${month}/${dom}/${year} ${h}:${m}:${s} ${session}`;
+
+            $("div.clock").text(time); 
+
+            setTimeout(showTime, 1000);
+
+        }
+
+        showTime();
+    })
+</script>
 {% endblock rearscript %}

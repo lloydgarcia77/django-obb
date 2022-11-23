@@ -6,7 +6,7 @@
 <div class="card card-warning shadow">
     <div class="card-header">
         <div class="card-title">
-            <b> Bus Seats</b>
+            <b> Bus Seats</b> 
         </div>
     </div>
     <div class="card-body seats">
@@ -33,17 +33,31 @@
             {% for b in sorted_bus_seat %}
             {% if forloop.counter > sorted_bus_seat|length|add:"-5" %}
             <div class="col mb-2">
+                {% if not b.enabled %}
+                <div class="seat-item">
+                    <input id="{{b.id}}" type="checkbox" value="{{b.name}}" class="seat" disabled="disabled">
+                    <label for="{{b.id}}" class="text-uppercase occupied" disabled="disabled">{{b.name}}</label>
+                </div>
+                {% else %}
                 <div class="seat-item">
                     <input id="{{b.id}}" type="checkbox" value="{{b.name}}" class="seat">
-                    <label for="{{b.id}}" class="text-uppercase">{{b.name}}</label>
+                    <label for="{{b.id}}" class="text-uppercase" >{{b.name}}</label>
                 </div>
+                {% endif %}
             </div>
             {% else %}
             <div class="col-md-3 mb-2">
+                {% if not b.enabled %}
+                <div class="seat-item">
+                    <input id="{{b.id}}" type="checkbox" value="{{b.name}}" class="seat" disabled="disabled">
+                    <label for="{{b.id}}" class="text-uppercase occupied" disabled="disabled">{{b.name}}</label>
+                </div>
+                {% else %}
                 <div class="seat-item">
                     <input id="{{b.id}}" type="checkbox" value="{{b.name}}" class="seat">
-                    <label for="{{b.id}}" class="text-uppercase">{{b.name}}</label>
+                    <label for="{{b.id}}" class="text-uppercase" >{{b.name}}</label>
                 </div>
+                {% endif %}
             </div>
             {% endif %}
             {% endfor %}

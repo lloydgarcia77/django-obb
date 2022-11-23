@@ -6,11 +6,9 @@ $(document).ready(function (e) {
             "date": formatDate(localStorage.getItem('selectedDate')),
             "badge": false,
             "title": "Selected Schedule",
-            "classname": "selected-date"
-            // "classname":"full-schedule-date"
+            "classname": "selected-date" 
 
-        }
-
+        } 
     ]
 
     let zab_cal_settings = {
@@ -73,10 +71,10 @@ $(document).ready(function (e) {
 
             },
             success: (data) => {
-                if (data.is_valid) {
-                    toastr.success("Routes has been loaded!")
-
-                    $("#table-routes").find('tbody').html(data.html_routes)
+                if (data.is_valid) { 
+                    zab_cal_settings = { ...zab_cal_settings, data: [...data.eventData, ...eventData] }; 
+                    toastr.success("Routes has been loaded!");
+                    $("#table-routes").find('tbody').html(data.html_routes);
 
                 } else {
                     toastr.error(`There's an error encountered: ${data.error}`)
@@ -86,8 +84,10 @@ $(document).ready(function (e) {
                 toastr.error("There an error on your date or route!");
             }
         }).done((data) => {
-            previousSelectedRoute = localStorage.getItem('route')
-            $("input:radio[name='route']").filter(`[value='${previousSelectedRoute}']`).prop('checked', true)
+            previousSelectedRoute = localStorage.getItem('route');
+            $("input:radio[name='route']").filter(`[value='${previousSelectedRoute}']`).prop('checked', true);
+             
+            $(zab_cal).empty().zabuto_calendar(zab_cal_settings);
         })
     }
 

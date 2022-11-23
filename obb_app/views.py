@@ -88,8 +88,33 @@ def administrator_index(request, *args, **kwargs):
     template_name = 'app/admin/index.html'
     user = get_object_or_404(models.User, email=request.user.email)
 
+    total_bus = models.Bus.objects.all().count()
+    total_routes  = models.Route.objects.all().count()
+    total_daily_schedule = models.DailySchedule.objects.all().count()
+
+
+    booking =  models.Booking.objects.all()
+    total_bookings = booking.count()
+    total_approved = booking.filter(Q(status=models.Booking.APPROVED))
+    total_pending = booking.filter(Q(status=models.Booking.PENDING))
+    total_cost = booking.aggregate(Sum('total_cost')).get('total_cost__sum')
+    total_paid = booking.filter(Q(is_paid=True)).count()
+    total_unpaid = booking.filter(Q(is_paid=False)).count()
+ 
+
     context = {
         'user': user,
+        'total_bus': total_bus,
+        'total_routes': total_routes,
+        'total_daily_schedule': total_daily_schedule,
+        'total_bookings': total_bookings,
+        'total_approved': total_approved,
+        'total_pending': total_pending,
+        'total_paid': total_paid,
+        'total_unpaid': total_unpaid,
+        'total_cost': total_cost,
+
+
     }
 
     return render(request,template_name,context)
@@ -163,6 +188,21 @@ def administrator_schedules_manage(request, *args, **kwargs):
             booking.delete()
             messages.error(request, "Booking has been deleted!")
         if isinstance(_send_mail, str): 
+                
+            mail_subject = 'CISCO Bus Inc Schedule Notification'  
+            to_email = [
+                i.get('email') for i in booking.seat_person
+            ] 
+            html_message = render_to_string('email_notifications/email_template.html', {    
+                'booking': booking, 
+            })     
+            email = EmailMessage(  
+                mail_subject, 
+                html_message, 
+                to=to_email, 
+            )  
+            email.content_subtype = 'html'  
+            email.send()  
             messages.info(request, "Email has been sent to each users!")
         return HttpResponseRedirect(reverse('obb_app:administrator_schedules'))
 
@@ -203,6 +243,35 @@ def search_results(request, *args, **kwargs):
 
     return render(request, template_name, context)
 
+def __get_bus_booking_seats(booking):
+    bus_seats = [
+        s.name for s in booking.bus.fk_bs_bus.all()
+    ] 
+    allocated_seats = [
+        s.get('seat')  for s in booking.seat_person
+    ]
+
+    diff = set(bus_seats) - set(allocated_seats)
+    diff = len(list(diff))
+
+    # if diff < len(bus_seats):
+    #     return ''
+
+    if diff <= 0:
+        return {
+            "date": booking.date.strftime("%Y-%m-%d"),
+            "badge": True,
+            "title": "Full Schedule", 
+            "classname": 'full-schedule-date'
+        }
+      
+
+    return {
+            "date": booking.date.strftime("%Y-%m-%d"),
+            "badge": False,
+            "title": "With Schedule",  
+    }
+  
 
 def step1(request, *args, **kwargs):
     template_name = 'app/client/step1.html' 
@@ -221,12 +290,21 @@ def step1(request, *args, **kwargs):
                     'destination': s.destination,
                     'via': s.via,
                     'time': s.time, 
+                    # 'available': True,
+                    # ! do not forget th
                     'available': s.time > datetime.strptime(timetoday, "%H:%M:%S").time(),
                 } for s in schedule
             ]
             data['is_valid'] = True
             data['html_routes'] = render_to_string('app/client/step1_route_list.html', {'schedule': schedule}, request)
 
+
+            eventData = [
+                __get_bus_booking_seats(e) for e in models.Booking.objects.filter(Q(status=models.Booking.APPROVED))
+            ]
+
+            data['eventData'] = eventData
+            # print(eventData)
         return JsonResponse(data)
 
     context = {
@@ -236,16 +314,26 @@ def step1(request, *args, **kwargs):
     return render(request, template_name, context)
 
 
+def __get_bus_seat_availables(booking, bus):
+    match_bus = list(filter(lambda i: i.bus == bus, booking))
+    bus_seat_count = bus.fk_bs_bus.all().count() 
+     
+    if bool(match_bus): 
+        return (bus_seat_count - len(match_bus[0].seat_person)) 
+    return bus_seat_count
+
 def step2(request, *args, **kwargs):
     template_name = 'app/client/step2.html' 
     data = dict()
     if request.is_ajax():
         if request.method == 'POST':
             date = request.POST.get('date','')
-            route = request.POST.get('route','') 
+            route = request.POST.get('route','')  
 
-            d = datetime.strptime(date, '%m/%d/%Y')
-            schedule = get_object_or_404(models.DailySchedule, id=route) 
+            d = datetime.strptime(date, '%m/%d/%Y')        
+            schedule = get_object_or_404(models.DailySchedule, id=route)  
+            bookings = models.Booking.objects.filter(Q(date=d) & Q(scheduled_route=schedule) & Q(status=models.Booking.APPROVED))#.values('bus', 'seat_person')
+ 
             schedule = [
                 {   
                     'id': s.id,
@@ -256,7 +344,7 @@ def step2(request, *args, **kwargs):
                     'plate_no': s.plate_no,  
                     'total_seat_no': s.fk_bs_bus.all().count(),
                     # ! occupied must reflect
-                    'total_avail_seat_no': s.fk_bs_bus.all().count()
+                    'total_avail_seat_no': __get_bus_seat_availables(bookings, s)
                 } for s in schedule.bus.all()
             ] 
             data['html_buses'] = render_to_string('app/client/step2_bus_list.html', {'schedule': schedule}, request)
@@ -268,6 +356,13 @@ def step2(request, *args, **kwargs):
     return render(request, template_name, context)
 
 
+
+def __get_occupied_seats(bookings, seat):
+    if bookings:
+        occupied_seats = [s.get('seat') for s in bookings[0].seat_person]
+        return False if seat in occupied_seats else True
+    return True
+
 def step3(request, *args, **kwargs):
     template_name = 'app/client/step3.html'  
     data = dict()
@@ -277,16 +372,27 @@ def step3(request, *args, **kwargs):
             date = request.POST.get('date','')
             route = request.POST.get('route','')
             bus = request.POST.get('bus','')
-              
-            #  ! msut be apply unti step 4
+               
             # d = dateutil.parser.isoparse(date)
             d = datetime.strptime(date, '%m/%d/%Y')
             schedule = get_object_or_404(models.DailySchedule, id=route)
             bus = get_object_or_404(models.Bus, id=bus) 
-            
-            bus_seat = models.BusSeat.objects.all().filter(bus=bus)
+
+            bookings = models.Booking.objects.filter(Q(date=d) & Q(scheduled_route=schedule) & Q(bus=bus) & Q(status=models.Booking.APPROVED)) 
+     
+         
+            # NOTE if booking bus is existing
  
-            sorted_bus_seat = sorted(bus_seat, key=lambda i : int(re.sub('\D', '', i.name)))
+            bus_seat = [
+                {
+                    'id': b.id,
+                    'name': b.name,
+                    'enabled':  __get_occupied_seats(bookings, b.name),
+                } for b in models.BusSeat.objects.all().filter(bus=bus)
+            ]
+ 
+ 
+            sorted_bus_seat = sorted(bus_seat, key=lambda i : int(re.sub('\D', '', i.get('name'))))
  
             data['html_seats'] = render_to_string('app/client/step3_seat_list.html', 
             {'sorted_bus_seat': sorted_bus_seat}, request)
@@ -336,17 +442,20 @@ def step4(request, *args, **kwargs):
  
                 if datetime.now().time() > route.time:
                     raise Exception('Invalid Time')
-                # ! available seats per dy
-                # available_seats = [
-                #     b.id for b in bus.fk_bs_bus if b.occupied
-                # ]
-               
+
+                bookings = models.Booking.objects.filter(Q(date=d) & Q(scheduled_route=route) & Q(bus=bus) & Q(status=models.Booking.APPROVED)) 
+            
+         
                 # NOTE: check the seat allocation
                 seat_details = json.loads(seat_details) 
 
                 for s in seat_details:
+                    if not __get_occupied_seats(bookings, s.get('seat')):
+                        raise Exception('Seat has been occupied')
+
                     if not __check_mail(s.get('email')):
                         raise Exception('Invalid Email') 
+                    
                     int(s.get('age'))
 
                 # NOTE: After validation
@@ -413,15 +522,15 @@ def step5(request, *args, **kwargs):
  
                 if datetime.now().time() > route.time:
                     raise Exception('Invalid Time')
-                # ! available seats per dy
-                # available_seats = [
-                #     b.id for b in bus.fk_bs_bus if b.occupied
-                # ]
+
+                bookings = models.Booking.objects.filter(Q(date=d) & Q(scheduled_route=route) & Q(bus=bus) & Q(status=models.Booking.APPROVED)) 
                
                 # NOTE: check the seat allocation
                 seat_details = json.loads(seat_details) 
 
                 for s in seat_details:
+                    if not __get_occupied_seats(bookings, s.get('seat')):
+                        raise Exception('Seat has been occupied')
                     if not __check_mail(s.get('email')):
                         raise Exception('Invalid Email') 
                     int(s.get('age'))
