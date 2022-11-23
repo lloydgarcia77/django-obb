@@ -433,8 +433,8 @@ def step4(request, *args, **kwargs):
         if request.method == 'POST': 
             route = request.POST.get('route','')
             bus = request.POST.get('bus','')
-            
-            selectedDate = request.POST.get('selectedDate','')
+            now = datetime.now()
+            selectedDate = request.POST.get('selectedDate',now)
             seat_details = request.POST.get('seat_details','')
 
             try:
@@ -446,9 +446,11 @@ def step4(request, *args, **kwargs):
                 # print(d.strftime('%Y-%m-%d %I:%M:%S %p')) 
                 route = get_object_or_404(models.DailySchedule, id=route, bus__id=bus)
                 bus = get_object_or_404(models.Bus, id=bus)
- 
-                if datetime.now().time() > route.time:
-                    raise Exception('Invalid Time')
+
+
+                if d.date() == now.date():
+                    if datetime.now().time() > route.time:
+                        raise Exception('Invalid Time')
 
                 bookings = models.Booking.objects.filter(Q(date=d) & Q(scheduled_route=route) & Q(bus=bus) & Q(status=models.Booking.APPROVED)) 
             
@@ -516,8 +518,8 @@ def step5(request, *args, **kwargs):
             route = request.POST.get('route','')
             bus = request.POST.get('bus','')
             booking = request.POST.get('booking','')
-            
-            selectedDate = request.POST.get('selectedDate','')
+            now = datetime.now()
+            selectedDate = request.POST.get('selectedDate',now)
             seat_details = request.POST.get('seat_details','')
 
             try:
@@ -526,9 +528,9 @@ def step5(request, *args, **kwargs):
 
                 route = get_object_or_404(models.DailySchedule, id=route, bus__id=bus)
                 bus = get_object_or_404(models.Bus, id=bus)
- 
-                if datetime.now().time() > route.time:
-                    raise Exception('Invalid Time')
+                if d.date() == now.date():
+                    if datetime.now().time() > route.time:
+                        raise Exception('Invalid Time')
 
                 bookings = models.Booking.objects.filter(Q(date=d) & Q(scheduled_route=route) & Q(bus=bus) & Q(status=models.Booking.APPROVED)) 
                
