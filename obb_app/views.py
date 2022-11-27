@@ -216,6 +216,79 @@ def administrator_schedules_manage(request, *args, **kwargs):
     return render(request,template_name,context)
 
 
+# NOTE: Sales 
+
+    
+@login_required
+def administrator_sales(request, *args, **kwargs):
+    template_name = 'app/admin/sales/sales.html'
+    user = get_object_or_404(models.User, email=request.user.email)
+  
+    objects = models.Booking.objects.all().filter(Q(is_paid=True)).order_by('-date_created') 
+ 
+    date_from = request.GET.get('date_from','')
+    date_to = request.GET.get('date_to','')
+
+    # print(request.GET.urlencode())
+    if date_from.strip() and date_to.strip(): 
+        date_from=datetime.strptime(date_from, "%Y-%m-%d")
+        date_to=datetime.strptime(date_to, "%Y-%m-%d")
+        
+        objects = objects.filter( 
+            Q(datetime_paid__range=[make_aware(date_from), make_aware(date_to)])
+            )
+
+    page = request.GET.get('page', 1)
+    
+    paginator = Paginator(objects, 5)
+
+    try:
+        query = paginator.page(page)
+    except PageNotAnInteger:
+        query = paginator.page(1)
+    except EmptyPage:
+        query = paginator.page(paginator.num_pages)
+
+ 
+     
+    context = {
+        'user': user,  
+        'query': query,
+    }
+
+  
+
+    return render(request,template_name,context)
+
+@login_required
+def administrator_sales_print(request, *args, **kwargs):
+    template_name = 'app/admin/sales/print.html'
+    user = get_object_or_404(models.User, email=request.user.email)
+
+    objects = models.Booking.objects.all().filter(Q(is_paid=True)).order_by('-date_created') 
+ 
+    date_from = request.GET.get('date_from','')
+    date_to = request.GET.get('date_to','')
+ 
+    if date_from.strip() and date_to.strip(): 
+        ddate_from=datetime.strptime(date_from, "%Y-%m-%d")
+        ddate_to=datetime.strptime(date_to, "%Y-%m-%d")
+         
+        objects = objects.filter( 
+            Q(datetime_paid__range=[make_aware(ddate_from), make_aware(ddate_to)])
+            )
+
+    context = {
+        'user': user,  
+        'query': objects,
+        'date_from': date_from,
+        'date_to': date_to,
+    }
+
+  
+
+    return render(request,template_name,context)
+
 
 # NOTE Client
 def index(request, *args, **kwargs): 

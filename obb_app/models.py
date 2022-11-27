@@ -224,7 +224,8 @@ class Booking(models.Model):
     class Meta:    
         
         ordering = ['-date_created']
-        unique_together = ('date', 'time',)
+        # ! please check later
+        unique_together = ('date', 'time', 'seat_person')
  
 class Receipt(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4) 

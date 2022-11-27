@@ -20,4 +20,6 @@ urlpatterns = [
     path('administrator/index/', views.administrator_index, name='administrator_index'),   
     path('administrator/schedules/', views.administrator_schedules, name='administrator_schedules'),   
     path('administrator/schedules/manage/<uuid:id>/', views.administrator_schedules_manage, name='administrator_schedules_manage'),   
+    path('administrator/sales/', views.administrator_sales, name='administrator_sales'),   
+    path('administrator/sales/print', views.administrator_sales_print, name='administrator_sales_print'),   
 ]

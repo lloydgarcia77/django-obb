@@ -135,7 +135,7 @@ class UserAdminChangeForm(forms.ModelForm):
 #         }
 
 
-# class DailyScheduleForm(forms.ModelForm): 
+class DailyScheduleForm(forms.ModelForm): 
   
     class Meta:
         model = models.DailySchedule

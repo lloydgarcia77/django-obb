@@ -386,6 +386,7 @@
                                                 <u>Cisco Bus Inc.</u>
                                             </h1>
                                             <h1>Hi Passenger,</h1>
+                                            <h1>Present this to the conductor, this will present as your receipt. </h1>
                                             <h2>Your booking appointment has been approved!</h2>
                                             <h3>Please see your schedule below:</h3>
                                             <table class="table table-striped table-bordered">
@@ -394,6 +395,13 @@
                                                     <tr>
                                                         <td colspan="2" class="text-center text-uppercase">Booking
                                                             Details:</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Booking ID:</td>
+                                                        <td>
+                                                            {{ booking.booking }}
+
+                                                        </td>
                                                     </tr>
                                                     <tr>
                                                         <td>Payment Status:</td>
