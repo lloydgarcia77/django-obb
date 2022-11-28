@@ -95,8 +95,8 @@ def administrator_index(request, *args, **kwargs):
 
     booking =  models.Booking.objects.all()
     total_bookings = booking.count()
-    total_approved = booking.filter(Q(status=models.Booking.APPROVED))
-    total_pending = booking.filter(Q(status=models.Booking.PENDING))
+    total_approved = booking.filter(Q(status=models.Booking.APPROVED)).count()
+    total_pending = booking.filter(Q(status=models.Booking.PENDING)).count()
     total_cost = booking.aggregate(Sum('total_cost')).get('total_cost__sum')
     total_paid = booking.filter(Q(is_paid=True)).count()
     total_unpaid = booking.filter(Q(is_paid=False)).count()
@@ -126,7 +126,54 @@ def administrator_schedules(request, *args, **kwargs):
  
     search = request.GET.get('search','')
 
-    objects = models.Booking.objects.all().order_by('-date_created') 
+    objects = models.Booking.objects.all().filter(Q(status=models.Booking.PENDING)).order_by('-date_created') 
+
+    if request.method == 'GET':
+        if search.strip(): 
+            objects = objects.filter(
+                Q(booking__icontains=search) |
+                Q(id__icontains=search) |  
+
+                Q(scheduled_route__source__name__icontains=search) | 
+                Q(scheduled_route__destination__name__icontains=search) | 
+                Q(scheduled_route__via__name__icontains=search) | 
+
+                Q(bus__name__icontains=search) |  
+                Q(bus__driver_name__icontains=search) |  
+                Q(bus__conductor_name__icontains=search) |  
+                Q(bus__type__icontains=search) |  
+                Q(bus__plate_no__icontains=search) |  
+                Q(reference_id__icontains=search) 
+                )
+
+    page = request.GET.get('page', 1)
+    
+    paginator = Paginator(objects, 5)
+
+    try:
+        query = paginator.page(page)
+    except PageNotAnInteger:
+        query = paginator.page(1)
+    except EmptyPage:
+        query = paginator.page(paginator.num_pages)
+     
+    context = {
+        'user': user,  
+        'query': query,
+    }
+
+  
+
+    return render(request,template_name,context)
+
+@login_required
+def administrator_schedules_approved(request, *args, **kwargs):
+    template_name = 'app/admin/schedules/approved.html'
+    user = get_object_or_404(models.User, email=request.user.email)
+ 
+    search = request.GET.get('search','')
+
+    objects = models.Booking.objects.all().filter(Q(status=models.Booking.APPROVED)).order_by('-date_created') 
 
     if request.method == 'GET':
         if search.strip(): 
@@ -255,8 +302,7 @@ def administrator_sales(request, *args, **kwargs):
         'user': user,  
         'query': query,
     }
-
-  
+ 
 
     return render(request,template_name,context)
 

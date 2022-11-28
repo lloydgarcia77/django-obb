@@ -36,7 +36,7 @@ CISCO | Admin Index
         </nav>
         <div class="row">
             <div class="col-md-12">
-                <div class="clock"> 
+                <div class="clock">
                 </div>
             </div>
         </div>
@@ -95,7 +95,7 @@ CISCO | Admin Index
                     <span class="info-box-icon bg-success"><i class="fas fa-thumbs-up"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Total Approved</span>
-                        <span class="info-box-number">{{total_bookings|intcomma}}</span>
+                        <span class="info-box-number">{{total_approved|intcomma}}</span>
                     </div>
 
                 </div>
@@ -106,7 +106,17 @@ CISCO | Admin Index
                     <span class="info-box-icon bg-warning"><i class="fas fa-hand-paper"></i></span>
                     <div class="info-box-content">
                         <span class="info-box-text">Total Pending</span>
-                        <span class="info-box-number">{{total_bookings|intcomma}}</span>
+                        <span class="info-box-number"> 
+                            {% if total_pending > 0 %}
+                                <span class="badge badge-danger">{{total_pending|intcomma}}</span> 
+                                <a href="{% url 'obb_app:administrator_schedules' %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-arrow-right mr-1"></i>Go Now
+                                </a>
+                            {% else %}
+                            
+                            {{total_pending|intcomma}}
+                            {% endif %}
+                        </span>
                     </div>
 
                 </div>
@@ -128,6 +138,7 @@ CISCO | Admin Index
                         <span class="info-box-text">Total Paid</span>
                         <span class="info-box-number">{{total_paid|intcomma}}</span>
                     </div>
+
                 </div>
             </div>
             <div class="col-md-3 col-sm-6 col-12">
@@ -170,10 +181,10 @@ CISCO | Admin Index
 
             h = (h < 10) ? "0" + h : h;
             m = (m < 10) ? "0" + m : m;
-            s = (s < 10) ? "0" + s : s; 
-            var time =  `${month}/${dom}/${year} ${h}:${m}:${s} ${session}`;
+            s = (s < 10) ? "0" + s : s;
+            var time = `${month}/${dom}/${year} ${h}:${m}:${s} ${session}`;
 
-            $("div.clock").text(time); 
+            $("div.clock").text(time);
 
             setTimeout(showTime, 1000);
 
