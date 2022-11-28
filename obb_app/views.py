@@ -42,7 +42,7 @@ from django.http import HttpResponse
 from django.templatetags.static import static
 from django.views.decorators.csrf import csrf_exempt
 
-import requests, logging, traceback, json, re
+import requests, logging, traceback, json, re,  functools
 import dateutil.parser , string, shortuuid
 
 logger = logging.getLogger('django')
@@ -437,13 +437,16 @@ def step1(request, *args, **kwargs):
 
     return render(request, template_name, context)
 
-
+ 
 def __get_bus_seat_availables(booking, bus):
-    match_bus = list(filter(lambda i: i.bus == bus, booking))
+    match_bus = list(filter(lambda i: i.bus == bus, booking)) 
     bus_seat_count = bus.fk_bs_bus.all().count() 
-     
+  
     if bool(match_bus): 
-        return (bus_seat_count - len(match_bus[0].seat_person)) 
+        bus_seat = [b.seat_person for b in match_bus] 
+        occupied_bus_seat = functools.reduce(lambda n, n1: n+n1, bus_seat) 
+        total = bus_seat_count - len(occupied_bus_seat) 
+        return total
     return bus_seat_count
 
 
@@ -459,7 +462,8 @@ def step2(request, *args, **kwargs):
             d = datetime.strptime(date, '%m/%d/%Y')        
             schedule = get_object_or_404(models.DailySchedule, id=route)  
             bookings = models.Booking.objects.filter(Q(date=d) & Q(scheduled_route=schedule) & Q(status=models.Booking.APPROVED))#.values('bus', 'seat_person')
- 
+            
+            
             schedule = [
                 {   
                     'id': s.id,
@@ -481,13 +485,19 @@ def step2(request, *args, **kwargs):
 
     return render(request, template_name, context)
 
+ 
+def __get_occupied_seats(occupied_seats, seat): 
+    return False if seat in occupied_seats else True 
 
-
-def __get_occupied_seats(bookings, seat):
-    if bookings:
-        occupied_seats = [s.get('seat') for s in bookings[0].seat_person]
-        return False if seat in occupied_seats else True
-    return True
+def __get_occupied_seat_list(booking, bus):
+    match_bus = list(filter(lambda i: i.bus == bus, booking)) 
+    if bool(match_bus): 
+        bus_seat = [b.seat_person for b in match_bus] 
+        occupied_bus_seat = functools.reduce(lambda n, n1: n+n1, bus_seat) 
+        occupied_bus_seat_list = [x.get('seat') for x in occupied_bus_seat]
+        
+        return occupied_bus_seat_list
+    return []
 
 def step3(request, *args, **kwargs):
     template_name = 'app/client/step3.html'  
@@ -508,12 +518,12 @@ def step3(request, *args, **kwargs):
      
          
             # NOTE if booking bus is existing
- 
+            occupied_bus_seat_list = __get_occupied_seat_list(bookings,bus)
             bus_seat = [
                 {
                     'id': b.id,
                     'name': b.name,
-                    'enabled':  __get_occupied_seats(bookings, b.name),
+                    'enabled':  __get_occupied_seats(occupied_bus_seat_list, b.name),
                 } for b in models.BusSeat.objects.all().filter(bus=bus)
             ]
  
